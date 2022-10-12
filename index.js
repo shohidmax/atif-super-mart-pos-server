@@ -3,53 +3,14 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-// const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
 const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
 
-
-
 const uri = "mongodb+srv://atifsupermart202199:FGzi4j6kRnYTIyP9@cluster0.bfulggv.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-
-
-
-// const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.rv98vtg.mongodb.net/?retryWrites=true&w=majority`;
-// const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-
-// function verifyJWT(req, res, next) {
-//   const authHeader = req.headers.authorization;
-//   if (!authHeader) {
-//     return res.status(401).send({ message: 'UnAuthorized access' });
-//   }
-//   const token = authHeader.split(' ')[1];
-//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
-//     if (err) {
-//       return res.status(403).send({ message: 'Forbidden access' })
-//     }
-//     req.decoded = decoded;
-//     next();
-//   });
-// }
-
-// veryfy admin portal
-
-//       const verifyAdmin = async (req, res, next) => {
-//         const requester = req.decoded.email;
-//         const requesterAccount = await userCollection.findOne({ email: requester });
-//         if (requesterAccount.role === 'admin') {
-//           next();
-//         }
-//         else {
-//           res.status(403).send({ message: 'forbidden' });
-//         }
-//       }
-
-
 
 
 async function run() {
@@ -66,13 +27,8 @@ async function run() {
    
     //     api making 
     //     product display
-    
-    //  app.get('/product',  async(req, res) =>{
-    //     const query = {};
-    //     const cursor = productCollection.find(query);
-    //     const products = await cursor.toArray();
-    //     res.send(products);
-    //     });
+
+
     app.get('/product',  async(req, res) =>{
         const query = {};
         const cursor = productCollection.find(query);
@@ -123,9 +79,7 @@ async function run() {
         const querys = {};
         const cursor =  productsCollection.find(querys);
         const produ = await cursor.toArray();
-        // console.log(produ);
         const getSerarchProduct = produ.find((p) => p.BarCode == id);
-        console.log(getSerarchProduct, 'booking data');
         res.send(getSerarchProduct);
        })
 
@@ -137,6 +91,24 @@ async function run() {
         const booking = await productsCollection.findOne(query);
         res.send(booking);
        })
+
+       app.put('/handleAddToDamage/:id', async(req, res) =>{
+        const id = req.params.id;
+        console.log(id);
+        const updatedStock = req.body;
+        console.log(updatedStock);
+        const filter = {_id: ObjectId(id)};
+        const options = { upsert: true };
+        const updatedDoc = {
+            $set: {
+                Damage_Quntity: updatedStock.reStock
+            }
+        };
+        const result = await productsCollection.updateOne(filter, updatedDoc, options);
+        res.send(result);
+       })
+
+
 
        // .....object data ........................................................................................................
        const productdata = {
