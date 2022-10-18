@@ -128,7 +128,7 @@ async function run() {
         "Damage_Quntity": 0,
         "Comment": 0,
         "Status": "active"
-    };
+        };
 
        
     // add brand 
@@ -160,6 +160,41 @@ async function run() {
             const result = await shopCollection.insertOne(newshop);
             res.send(result)
           });
+
+        //   search api
+
+          app.get('/search/:target', async (req , res ) =>{
+            let q = req.params;
+            // console.log(q);
+             let result =  await productsCollection.find({
+               "$or":[
+                
+                 {
+                   Group: {$regex: req.params.target}
+                 },
+                 {
+                   Product: {$regex: req.params.target}
+                 },
+                 {
+                   Brand: {$regex: req.params.target}
+                 },
+                 {
+                   Style: {$regex: req.params.target}
+                 },
+                 {
+                   BarCode: {$regex: req.params.target}
+                 }
+                //  },
+                //  {
+                //     Supplier_Name: {$regex: req.params.target}
+                //   }
+               ]
+             });
+             let rest = await result.toArray();
+             // console.log(rest);
+             res.send(rest);
+     
+         });
 // deleting item
     app.delete('/brand/:id',   async(req, res) =>{
          const id = req.params.id;
