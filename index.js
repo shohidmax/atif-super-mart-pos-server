@@ -162,39 +162,85 @@ async function run() {
           });
 
         //   search api
+        const rolll = {
+          "_id": "633f4e807784639f332e3afc",
+          "Supplier_Name": "DANISH FOOD LTD.",
+          "BarCode": 8941152000307,
+          "Group": "SNAKS & COOKIES",
+          "Product": "BISCUIT",
+          "Brand": "DANISH",
+          "Style": "DOREO 4 PACK",
+          "Stock_Qty": 0,
+          "StockQty": 6,
+          "CPU": 88,
+          "CPU_Value": 0,
+          "RPU": 110,
+          "RPU_Value": 0,
+          "Damage_Quntity": 9,
+          "Comment": 0,
+          "Status": "active"
+          };
 
-          app.get('/search/:target', async (req , res ) =>{
-            let q = req.params;
-            // console.log(q);
-             let result =  await productsCollection.find({
-               "$or":[
+        //   app.get('/search/:text', async (req , res ) =>{
+        //       let q = req.params; 
+        //       console.log(q);
+        //      let result =  await productsCollection.find({
+        //        "$or":[
                 
-                 {
-                   Group: {$regex: req.params.target}
-                 },
-                 {
-                   Product: {$regex: req.params.target}
-                 },
-                 {
-                   Brand: {$regex: req.params.target}
-                 },
-                 {
-                   Style: {$regex: req.params.target}
-                 },
-                 {
-                   BarCode: {$regex: req.params.target}
-                 }
-                //  },
-                //  {
-                //     Supplier_Name: {$regex: req.params.target}
-                //   }
-               ]
-             });
-             let rest = await result.toArray();
-             // console.log(rest);
-             res.send(rest);
+        //          {
+        //           Group: {$regex: req.params.target}
+        //          },
+        //          {
+        //           Product: {$regex: req.params.target}
+        //          },
+        //          { 
+        //           Brand: {$regex: req.params.target}
+        //          },
+        //          {
+        //           Style: {$regex: req.params.target}
+        //          },
+        //          {
+        //           BarCode: {$regex: req.params.target}
+        //          }
+        //         //  },
+        //         //  {
+        //         //     Supplier_Name: {$regex: req.params.target}
+        //         //   }
+        //        ]
+        //      });
+        //      let rest = await result.toArray();
+        //      // console.log(rest);
+        //      res.send(rest);
      
-         });
+        //  });
+         
+    app.get('/search/:target', async (req , res ) =>{
+      let q = req.params;
+      console.log(q);
+       let result =  await productsCollection.find({
+         "$or":[
+          
+           {
+             Group: {$regex: req.params.target}
+           },
+           {
+             Product: {$regex: req.params.target}
+           },
+           {
+             Brand: {$regex: req.params.target}
+           },
+           {
+             Style: {$regex: req.params.target}
+           },
+           {
+             BarCode: {$regex: req.params.target}
+           },
+         ]
+       });
+       let rest = await result.toArray();
+       // console.log(rest);
+       res.send(rest);
+   });
 // deleting item
     app.delete('/brand/:id',   async(req, res) =>{
          const id = req.params.id;
