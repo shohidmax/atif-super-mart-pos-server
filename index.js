@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId, ISODate } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -24,11 +24,13 @@ async function run() {
       const groupCollection = client.db('atifdatamax').collection('group');
       const ssrCollection = client.db('atifdatamax').collection('ssr');
       const shopCollection = client.db('atifdatamax').collection('shop');
+      const SaleCollection = client.db('atifdatamax').collection('sale');
+      const HoldCollection = client.db('atifdatamax').collection('hold');
    
     //     api making 
     //     product display
 
-
+    
     app.get('/product',  async(req, res) =>{
         const query = {};
         const cursor = productCollection.find(query);
@@ -71,11 +73,22 @@ async function run() {
         const shop = await cursor.toArray();
         res.send(shop);
         });
+    app.get('/sale',  async(req, res) =>{
+        const query = {};
+        const cursor = SaleCollection.find(query);
+        const shop = await cursor.toArray();
+        res.send(shop);
+        });
+    app.get('/hold',  async(req, res) =>{
+        const query = {};
+        const cursor = HoldCollection.find(query);
+        const hold = await cursor.toArray();
+        res.send(hold);
+        });
 
        // get damage speacific product
     app.get('/damage-stock-update/:id',   async(req, res) =>{
-        const id = req.params.id;
-        console.log(id);
+        const id = req.params.id; 
         const querys = {};
         const cursor =  productsCollection.find(querys);
         const produ = await cursor.toArray();
@@ -83,6 +96,23 @@ async function run() {
         res.send(getSerarchProduct);
        })
 
+      //  filter datat between tow date 
+      app.get('/datefilter',  async(req, res) =>{
+        const {sdate , edate} = req.query;
+        // console.log(sdate , edate);
+        const query = {};
+        const cursor = SaleCollection.find(query);
+        const shop = await cursor.toArray(cursor);
+        const startdate = new Date(sdate);
+        const enddate = new Date(edate);
+        const filterdate = shop.filter(a => {
+          const date = new Date(a.date);
+          return(date >= startdate && date <= enddate);
+        });
+        res.send(filterdate);
+        }); 
+
+    
 
     // get with speacific product stock
     app.get('/products/:id',   async(req, res) =>{
@@ -139,6 +169,12 @@ async function run() {
             const result = await brandCollection.insertOne(newBrand);
             res.send(result)
           });
+        app.post('/sale', async(req, res) =>{
+            const newSale = req.body;
+            console.log('adding new brand', newSale);
+            const result = await SaleCollection.insertOne(newSale);
+            res.send(result)
+          });
     // add supplier 
         app.post('/supplier', async(req, res) =>{
             const newSSR = req.body;
@@ -158,6 +194,13 @@ async function run() {
             const newshop = req.body;
             console.log('adding new supplier', newshop);
             const result = await shopCollection.insertOne(newshop);
+            res.send(result)
+          });
+    // add ssr 
+        app.post('/holddata', async(req, res) =>{
+            const Holddata = req.body; 
+            console.log('adding new supplier', Holddata);
+            const result = await HoldCollection.insertOne(Holddata);
             res.send(result)
           });
 
@@ -181,38 +224,6 @@ async function run() {
           "Status": "active"
           };
 
-        //   app.get('/search/:text', async (req , res ) =>{
-        //       let q = req.params; 
-        //       console.log(q);
-        //      let result =  await productsCollection.find({
-        //        "$or":[
-                
-        //          {
-        //           Group: {$regex: req.params.target}
-        //          },
-        //          {
-        //           Product: {$regex: req.params.target}
-        //          },
-        //          { 
-        //           Brand: {$regex: req.params.target}
-        //          },
-        //          {
-        //           Style: {$regex: req.params.target}
-        //          },
-        //          {
-        //           BarCode: {$regex: req.params.target}
-        //          }
-        //         //  },
-        //         //  {
-        //         //     Supplier_Name: {$regex: req.params.target}
-        //         //   }
-        //        ]
-        //      });
-        //      let rest = await result.toArray();
-        //      // console.log(rest);
-        //      res.send(rest);
-     
-        //  });
          
     app.get('/search/:target', async (req , res ) =>{
       let q = req.params;
@@ -272,3 +283,31 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log("Atif super  mart server running at  : ", port);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+//  function previous_year_artist(req, res, next) {
+//         var dateTimeTofilter = moment().subtract(1, 'year');
+//         var filter = {
+//             "date_added": {
+//                 $gte: new Date(dateTimeTofilter._d)
+//             }
+//         };
+//         db.collection.find(
+//             filter
+//         ).toArray(function(err, result) {
+//             if (err) return next(err);
+//             res.send(result);
+//         });
+
+//     }
