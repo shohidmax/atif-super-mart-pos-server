@@ -26,6 +26,7 @@ async function run() {
       const shopCollection = client.db('atifdatamax').collection('shop');
       const SaleCollection = client.db('atifdatamax').collection('sale');
       const HoldCollection = client.db('atifdatamax').collection('hold');
+      const proddCollection = client.db('atifdatamax').collection('prodd');
    
     //     api making 
     //     product display
@@ -85,6 +86,12 @@ async function run() {
         const hold = await cursor.toArray();
         res.send(hold);
         });
+    app.get('/prod',  async(req, res) =>{
+        const query = {};
+        const cursor = proddCollection.find(query);
+        const hold = await cursor.toArray();
+        res.send(hold);
+        });
 
        // get damage speacific product
     app.get('/damage-stock-update/:id',   async(req, res) =>{
@@ -94,6 +101,17 @@ async function run() {
         const produ = await cursor.toArray();
         const getSerarchProduct = produ.find((p) => p.BarCode == id);
         res.send(getSerarchProduct);
+       })
+    app.get('/hold/:id',   async(req, res) =>{
+        const id = req.params.id; 
+        const querys = {};
+        const cursor =  HoldCollection.find(querys);
+        const produ = await cursor.toArray();
+        const getSerarchProduct = produ.find((p) => p.Hold_ID == id);
+        
+        res.send(getSerarchProduct);
+        const query = {_id: ObjectId(getSerarchProduct._id)}; 
+        const result = await HoldCollection.deleteOne(query); 
        })
 
       //  filter datat between tow date 
@@ -123,10 +141,8 @@ async function run() {
        })
 
        app.put('/handleAddToDamage/:id', async(req, res) =>{
-        const id = req.params.id;
-        console.log(id);
-        const updatedStock = req.body;
-        console.log(updatedStock);
+        const id = req.params.id; 
+        const updatedStock = req.body; 
         const filter = {_id: ObjectId(id)};
         const options = { upsert: true };
         const updatedDoc = {
@@ -136,6 +152,32 @@ async function run() {
         };
         const result = await productsCollection.updateOne(filter, updatedDoc, options);
         res.send(result);
+       })
+
+       // -------------------------------------------------------------sale ------
+       app.put('/finalsale', async(req, res) =>{
+        // const id = req.params.id; 
+        const updatedStock = req.body; 
+        const arry = updatedStock.Saled;
+        for await (const pro of arry) {
+          const ID = pro._id;
+          // console.log(pro._id, pro.StockQty - pro.orderq, pro);
+          const update = pro.StockQty - pro.orderq;  
+          const filter = {_id: ObjectId(ID)};
+          const options = { upsert: true };
+          const updatedDoc = {
+              $set: {
+                StockQty: update
+              }
+          };
+          const result = await productsCollection.updateOne(filter, updatedDoc, options);
+          // console.log(result);
+        }
+        // ---------------------------------------------- for  update  --------------
+       
+
+        // ---------------------------- update close ---------------------------------- 
+        res.send({'data':'succesfully data updated'});
        })
 
 
@@ -252,20 +294,31 @@ async function run() {
        // console.log(rest);
        res.send(rest);
    });
+    app.get('/shoppurchase', async (req , res ) =>{
+      const {supp, barcode} = req.query;
+      console.log({supp, barcode}); 
+       let result =  await productsCollection.find({
+         "$or":[
+           {
+            Supplier_Name: {$regex: supp}
+           }
+         ]
+       });
+       let rest = await result.toArray();
+       const final = rest.find(r => r.BarCode.toString() === barcode.toString());
+       if (final) {
+       res.send(final); 
+       }else{
+        res.send({data: 'data not found'});
+       }
+   });
 // deleting item
     app.delete('/brand/:id',   async(req, res) =>{
-         const id = req.params.id;
-         console.log("brand", id);
-         console.log(ObjectId(id), 'object id');
-         const query = {_id: ObjectId(id)};
-         console.log(query, 'quary');
+         const id = req.params.id; 
+         const query = {_id: ObjectId(id)}; 
          const result = await brandCollection.deleteOne(query);
          res.send(result);
-        })
-
-
-
-  
+        }) 
     }
     finally{
 
