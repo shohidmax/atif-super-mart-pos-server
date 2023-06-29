@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId, ISODate } = require('mongodb');
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 3002;
 
 app.use(cors());
 app.use(express.json());
@@ -27,10 +27,130 @@ async function run() {
     const SaleCollection = client.db('atifdatamax').collection('sale');
     const HoldCollection = client.db('atifdatamax').collection('hold');
     const proddCollection = client.db('atifdatamax').collection('prodd');
+      // account temporary code for atif super mart
+      const accountsCollection = client.db('atifdatamax').collection('accounts');
+      const bankCollection = client.db('atifdatamax').collection('bank');
+      const noteCollection = client.db('atifdatamax').collection('note');
+      const costCollection = client.db('atifdatamax').collection('Cost');
+      const dueCollection = client.db('atifdatamax').collection('Due');
+
 
     //     api making 
     //     product display
+    // ----------------------------------------------------------------
+    app.get('/accounts', async (req, res) => {
+      const query = {};
+      const cursor = accountsCollection.find(query);
+      const accounts = await cursor.toArray();
+      res.send(accounts);
+    });
+    app.get('/bank', async (req, res) => {
+      const query = {};
+      const cursor = bankCollection.find(query);
+      const bank = await cursor.toArray();
+      res.send(bank);
+    });
+    app.get('/note', async (req, res) => {
+      const query = {};
+      const cursor = noteCollection.find(query);
+      const note = await cursor.toArray();
+      res.send(note);
+    });
+    app.get('/cost', async (req, res) => {
+      const query = {};
+      const cursor = costCollection.find(query);
+      const cost = await cursor.toArray();
+      res.send(cost);
+    });
+    app.get('/due', async (req, res) => {
+      const query = {};
+      const cursor = dueCollection.find(query);
+      const due = await cursor.toArray();
+      res.send(due);
+    });
 
+
+     // all post item
+     app.post('/accounts', async (req, res) => {
+      const accounts = req.body;
+      const result = await accountsCollection.insertOne(accounts);
+      res.send(result)
+    });
+    app.post('/bank', async (req, res) => {
+      const bank = req.body;
+      const result = await bankCollection.insertOne(bank);
+      res.send(result)
+      console.log(bank);
+    });
+    app.post('/note', async (req, res) => {
+      const note = req.body;
+      const result = await noteCollection.insertOne(note);
+      res.send(result)
+    });
+    app.post('/cost', async (req, res) => {
+      const cost = req.body;
+      const result = await costCollection.insertOne(cost);
+      res.send(result)
+    });
+    app.post('/due', async (req, res) => {
+      const due = req.body;
+      const result = await dueCollection.insertOne(due);
+      res.send(result)
+    });
+
+
+    // delet one 
+    app.delete('/bank/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await bankCollection.deleteOne(query);
+      res.send(result);
+    })
+    app.delete('/cost/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await costCollection.deleteOne(query);
+      res.send(result);
+      console.log(result);
+
+    })
+    app.delete('/accounts/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await accountsCollection.deleteOne(query);
+      res.send(result);
+      console.log(result);
+
+    })
+    app.delete('/note/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await noteCollection.deleteOne(query);
+      res.send(result);
+      console.log(result);
+
+    })
+    app.delete('/due/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await dueCollection.deleteOne(query);
+      res.send(result);
+      console.log(result);
+
+    })
+ 
+    // Delete all data from the MongoDB collection
+    app.get('/api/delete', async (req, res) => {
+
+        const result = await dueCollection.deleteMany({});
+        res.send(result);
+
+      
+    });
+
+
+
+    //-----------------------------------------------------------------
 
     app.get('/product', async (req, res) => {
       const query = {};
@@ -232,21 +352,6 @@ async function run() {
       // ---------------------------- update close ---------------------------------- 
       res.send({ 'data': 'succesfully data updated',updatedStock ,result,invoice_list});
     })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
