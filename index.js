@@ -37,9 +37,23 @@ async function run() {
       const todayrestCollection = client.db('atifdatamax').collection('restamound');
       const nestcortCollection = client.db('atifdatamax').collection('nestcort');
 
+
+       // Delete all data from the MongoDB collection
+    app.get('/api/delete', async (req, res) => {
+      const result = await bankCollection.deleteMany({});
+      const result2 = await noteCollection.deleteMany({});
+      const result3 = await costCollection.deleteMany({});
+      const result4 = await dueCollection.deleteMany({});
+      const result5 = await addMoneyCollection.deleteMany({});
+      const result6 = await todaysaleCollection.deleteMany({});
+      const result7 = await todayrestCollection.deleteMany({});
+      const result8 = await nestcortCollection.deleteMany({});
+      res.send(result);
+    });
     //     api making 
     //     product display
     // ----------------------------------------------------------------
+
     app.get('/accounts', async (req, res) => {
       const query = {};
       const cursor = accountsCollection.find(query);
@@ -211,6 +225,7 @@ async function run() {
     })
     app.delete('/todayrestamound/:id', async (req, res) => { 
       const id = req.params.id;
+      console.log(id);
       const query = { _id: ObjectId(id) };
       const result = await todayrestCollection.deleteOne(query);
       res.send(result); 
