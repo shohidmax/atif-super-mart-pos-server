@@ -209,6 +209,13 @@ async function run() {
       res.send(result); 
 
     })
+    app.delete('/todayrestamound/:id', async (req, res) => { 
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await todayrestCollection.deleteOne(query);
+      res.send(result); 
+
+    })
  
     // Delete all data from the MongoDB collection
     app.get('/api/delete', async (req, res) => {
