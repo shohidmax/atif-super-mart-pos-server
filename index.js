@@ -34,6 +34,7 @@ async function run() {
       const dueCollection = client.db('atifdatamax').collection('Due');
       const addMoneyCollection = client.db('atifdatamax').collection('addMoney');
       const todaysaleCollection = client.db('atifdatamax').collection('todaysale');
+      const todayrestCollection = client.db('atifdatamax').collection('restamound');
       const nestcortCollection = client.db('atifdatamax').collection('nestcort');
 
     //     api making 
@@ -81,6 +82,12 @@ async function run() {
       const todaysale = await cursor.toArray();
       res.send(todaysale);
     });
+    app.get('/todayrestamound', async (req, res) => {
+      const query = {};
+      const cursor = todayrestCollection.find(query);
+      const todayrest = await cursor.toArray();
+      res.send(todayrest);
+    });
     app.get('/nextcort', async (req, res) => {
       const query = {};
       const cursor = nestcortCollection.find(query);
@@ -92,7 +99,7 @@ async function run() {
 
 
 
-    
+
      // all post item
      app.post('/nextcort', async (req, res) => {
       const nextcort = req.body;
@@ -102,6 +109,11 @@ async function run() {
      app.post('/todaysale', async (req, res) => {
       const todaysale = req.body;
       const result = await todaysaleCollection.insertOne(todaysale);
+      res.send(result)
+    });
+     app.post('/todayrestamound', async (req, res) => {
+      const todayrest = req.body;
+      const result = await todayrestCollection.insertOne(todayrest);
       res.send(result)
     });
      app.post('/accounts', async (req, res) => {
