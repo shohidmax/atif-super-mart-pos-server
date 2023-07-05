@@ -34,6 +34,7 @@ async function run() {
       const dueCollection = client.db('atifdatamax').collection('Due');
       const addMoneyCollection = client.db('atifdatamax').collection('addMoney');
       const todaysaleCollection = client.db('atifdatamax').collection('todaysale');
+      const nestcortCollection = client.db('atifdatamax').collection('nestcort');
 
     //     api making 
     //     product display
@@ -80,9 +81,24 @@ async function run() {
       const todaysale = await cursor.toArray();
       res.send(todaysale);
     });
+    app.get('/nextcort', async (req, res) => {
+      const query = {};
+      const cursor = nestcortCollection.find(query);
+      const nextcort = await cursor.toArray();
+      res.send(nextcort);
+    });
 
 
+
+
+
+    
      // all post item
+     app.post('/nextcort', async (req, res) => {
+      const nextcort = req.body;
+      const result = await nestcortCollection.insertOne(nextcort);
+      res.send(result)
+    });
      app.post('/todaysale', async (req, res) => {
       const todaysale = req.body;
       const result = await todaysaleCollection.insertOne(todaysale);
@@ -120,7 +136,20 @@ async function run() {
     });
 
 
-    // delet one 
+
+
+
+
+
+
+
+    // delete one 
+    app.delete('/nextcort/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await nestcortCollection.deleteOne(query);
+      res.send(result);
+    })
     app.delete('/addmoney/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
