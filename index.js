@@ -12,7 +12,6 @@ app.use(express.json());
 const uri = "mongodb+srv://atifsupermart202199:FGzi4j6kRnYTIyP9@cluster0.bfulggv.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-
 async function run() {
   try {
     await client.connect();
@@ -33,7 +32,8 @@ async function run() {
       const noteCollection = client.db('atifdatamax').collection('note');
       const costCollection = client.db('atifdatamax').collection('Cost');
       const dueCollection = client.db('atifdatamax').collection('Due');
-
+      const addMoneyCollection = client.db('atifdatamax').collection('addMoney');
+      const todaysaleCollection = client.db('atifdatamax').collection('todaysale');
 
     //     api making 
     //     product display
@@ -68,9 +68,26 @@ async function run() {
       const due = await cursor.toArray();
       res.send(due);
     });
+    app.get('/addmoney', async (req, res) => {
+      const query = {};
+      const cursor = addMoneyCollection.find(query);
+      const due = await cursor.toArray();
+      res.send(due);
+    });
+    app.get('/todaysale', async (req, res) => {
+      const query = {};
+      const cursor = todaysaleCollection.find(query);
+      const todaysale = await cursor.toArray();
+      res.send(todaysale);
+    });
 
 
      // all post item
+     app.post('/todaysale', async (req, res) => {
+      const todaysale = req.body;
+      const result = await todaysaleCollection.insertOne(todaysale);
+      res.send(result)
+    });
      app.post('/accounts', async (req, res) => {
       const accounts = req.body;
       const result = await accountsCollection.insertOne(accounts);
@@ -79,8 +96,7 @@ async function run() {
     app.post('/bank', async (req, res) => {
       const bank = req.body;
       const result = await bankCollection.insertOne(bank);
-      res.send(result)
-      console.log(bank);
+      res.send(result) 
     });
     app.post('/note', async (req, res) => {
       const note = req.body;
@@ -97,9 +113,20 @@ async function run() {
       const result = await dueCollection.insertOne(due);
       res.send(result)
     });
+    app.post('/addmoney', async (req, res) => {
+      const due = req.body;
+      const result = await addMoneyCollection.insertOne(due);
+      res.send(result)
+    });
 
 
     // delet one 
+    app.delete('/addmoney/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await addMoneyCollection.deleteOne(query);
+      res.send(result);
+    })
     app.delete('/bank/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -110,46 +137,43 @@ async function run() {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await costCollection.deleteOne(query);
-      res.send(result);
-      console.log(result);
+      res.send(result); 
 
     })
     app.delete('/accounts/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await accountsCollection.deleteOne(query);
-      res.send(result);
-      console.log(result);
+      res.send(result); 
 
     })
     app.delete('/note/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await noteCollection.deleteOne(query);
-      res.send(result);
-      console.log(result);
+      res.send(result); 
 
     })
     app.delete('/due/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await dueCollection.deleteOne(query);
-      res.send(result);
-      console.log(result);
+      res.send(result); 
+
+    })
+    app.delete('/todaysale/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await todaysaleCollection.deleteOne(query);
+      res.send(result); 
 
     })
  
     // Delete all data from the MongoDB collection
     app.get('/api/delete', async (req, res) => {
-
         const result = await dueCollection.deleteMany({});
         res.send(result);
-
-      
     });
-
-
-
     //-----------------------------------------------------------------
 
     app.get('/product', async (req, res) => {
@@ -259,8 +283,7 @@ async function run() {
       const filterdate = shop.filter(a => {
         const date = new Date(a.date);
         return (date >= startdate && date <= enddate);
-      });
-      console.log(filterdate);
+      }); 
       res.send(filterdate);
     });
 
@@ -286,18 +309,12 @@ async function run() {
       };
       const result = await productsCollection.updateOne(filter, updatedDoc, options);
       res.send(result);
-    })
+    });
 
 
+//,,,,,,,,,,,,saju vai due drop,,,,,,,,,,,,,,,,,, 01648211024
 
-
-
-
-
-//,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,, 01648211024
-
-
-
+ 
 
     // -------------------------------------------------------------sale ------
     app.put('/finalsale', async (req, res) => {
@@ -308,8 +325,6 @@ async function run() {
       const cursor = SaleCollection.find(query);
       const sale = await cursor.toArray();
 
-
-
       console.log(updatedStock.Sale_Date);
       const sdate = await new Date(updatedStock.Sale_Date);
       const edate = await new Date(updatedStock.Sale_Date);
@@ -318,9 +333,7 @@ async function run() {
         return (date >= sdate && date <= edate);
       });
       console.log(filterdate, '/////////////////');
-
-
-
+ 
       let invoice_list = [];
       //------------------------------------
         for await (const inv of sale){
@@ -379,42 +392,36 @@ async function run() {
     // add brand 
 
     app.post('/brand', async (req, res) => {
-      const newBrand = req.body;
-      // console.log('adding new brand', newBrand);
+      const newBrand = req.body; 
       const result = await brandCollection.insertOne(newBrand);
       res.send(result)
     });
     app.post('/sale', async (req, res) => {
-      const newSale = req.body;
-      // console.log('adding new brand', newSale);
+      const newSale = req.body; 
       const result = await SaleCollection.insertOne(newSale);
       res.send(result)
     });
     // add supplier 
     app.post('/supplier', async (req, res) => {
-      const newSSR = req.body;
-      // console.log('adding new supplier', newSSR);
+      const newSSR = req.body; 
       const result = await supplierCollection.insertOne(newSSR);
       res.send(result)
     });
     // add ssr 
     app.post('/ssr', async (req, res) => {
-      const newSSR = req.body;
-      // console.log('adding new supplier', newSSR);
+      const newSSR = req.body; 
       const result = await ssrCollection.insertOne(newSSR);
       res.send(result)
     });
     // add ssr 
     app.post('/shop', async (req, res) => {
-      const newshop = req.body;
-      // console.log('adding new supplier', newshop);
+      const newshop = req.body; 
       const result = await shopCollection.insertOne(newshop);
       res.send(result)
     });
     // add ssr 
     app.post('/holddata', async (req, res) => {
-      const Holddata = req.body;
-      // console.log('adding new supplier', Holddata);
+      const Holddata = req.body; 
       const result = await HoldCollection.insertOne(Holddata);
       res.send(result)
     });
