@@ -52,9 +52,9 @@ async function run() {
     });
     app.get('/api/v3/finalsubmit', async(req, res) =>{
 
-    const date = new Date();
-
-      res.send( date)
+      const d = new Date("2021-03-25");
+        d.getFullYear();
+      res.send('your data submitted ,,,,,,,,,', d)
     })
     app.post('/api/v3/finalsubmit', async (req, res) => {
       const accounts = req.body;
