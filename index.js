@@ -342,7 +342,7 @@ async function run() {
     //  filter datat between tow date 
     app.get('/datefilter', async (req, res) => {
       const { sdate, edate } = req.query;
-      // console.log(sdate , edate);
+      console.log(sdate , edate);
       // const query = {};
       // const cursor = SaleCollection.find(query);
       // const shop = await cursor.toArray(cursor);
