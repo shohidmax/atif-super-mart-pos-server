@@ -64,7 +64,12 @@ async function run() {
     //     api making 
     //     product display
     // ----------------------------------------------------------------
-
+       app.get('/accounts/:id',   async(req, res) =>{
+     const id = req.params.id;
+     const query = {_id: ObjectId(id)};
+     const booking = await accountsCollection.findOne(query);
+     res.send(booking);
+    })
     app.get('/accounts', async (req, res) => {
       const query = {};
       const cursor = accountsCollection.find(query);
