@@ -176,6 +176,21 @@ async function run() {
       const result = await addMoneyCollection.insertOne(due);
       res.send(result)
     });
+    app.get('/accountsreportbydate', async (req, res) => {
+      const { sdate, edate } = req.query;
+      console.log(sdate , edate); 
+      const query = {};
+      const cursor = accountsCollection.find(query);
+      const shop = await cursor.toArray();
+      
+      const startdate = new Date(sdate);
+      const enddate = new Date(edate);
+      const filterdate = shop.filter(a => {
+        const date = new Date(a.date);
+        return (date >= startdate && date <= enddate);
+      }); 
+      res.send(filterdate);
+    });
 
 
 
