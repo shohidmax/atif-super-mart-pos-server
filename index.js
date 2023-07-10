@@ -181,11 +181,11 @@ async function run() {
       console.log(sdate , edate); 
       const query = {};
       const cursor = accountsCollection.find(query);
-      const shop = await cursor.toArray();
+      const Accounts = await cursor.toArray();
       
       const startdate = new Date(sdate);
       const enddate = new Date(edate);
-      const filterdate = accountsCollection.filter(a => {
+      const filterdate = Accounts.filter(a => {
         const date = new Date(a.Hisab_Date);
         return (date >= startdate && date <= enddate);
       }); 
