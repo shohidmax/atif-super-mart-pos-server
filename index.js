@@ -185,8 +185,8 @@ async function run() {
       
       const startdate = new Date(sdate);
       const enddate = new Date(edate);
-      const filterdate = shop.filter(a => {
-        const date = new Date(a.date);
+      const filterdate = accountsCollection.filter(a => {
+        const date = new Date(a.Hisab_Date);
         return (date >= startdate && date <= enddate);
       }); 
       res.send(filterdate);
