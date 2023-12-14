@@ -1,10 +1,25 @@
 const express = require('express');
 const cors = require('cors');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const bodyParser = require('body-parser');
+// const { createCanvas, loadImage } = require('canvas');
 require('dotenv').config();
+
 const { MongoClient, ServerApiVersion, ObjectId, ISODate } = require('mongodb');
 const app = express();
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 3005;
+
+
+//----------------------avatar api resorce -----------
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Set up multer for handling file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+// -----------------avatar api close ----------
 
 app.use(cors());
 app.use(express.json());
@@ -36,6 +51,8 @@ async function run() {
       const todaysaleCollection = client.db('atifdatamax').collection('todaysale');
       const todayrestCollection = client.db('atifdatamax').collection('restamound');
       const nestcortCollection = client.db('atifdatamax').collection('nestcort');
+      const lotary = client.db('atifdatamax').collection('lotary');
+      const deletedStored = client.db('atifdatamax').collection('delet');
 
 
        // Delete all data from the MongoDB collection
@@ -51,20 +68,63 @@ async function run() {
       res.send(result);
     });
     app.get('/api/v3/finalsubmit', async(req, res) =>{
-
     const date = new Date();
-
       res.send( date)
     })
     app.post('/api/v3/finalsubmit', async (req, res) => {
       const accounts = req.body;
       const result = await accountsCollection.insertOne(accounts);
       res.send(result)
-    });
-    //     api making 
+    }); 
     //     product display
     // ----------------------------------------------------------------
-       app.get('/accounts/:id',   async(req, res) =>{
+    app.get('/qqq',   async(req, res) =>{
+     const id = req.params.id;
+     const  date = new Date();
+     console.log(date);
+     res.send('bacfdfd', date)
+    })
+
+    //-------------------avatar making api -----------------------------
+    // Sample route for image upload and 3D avatar conversion
+app.post('/convertTo3DAvatar', upload.single('image'), async (req, res) => {
+  try {
+    // Get uploaded image data
+    const imageData = req.file.buffer;
+
+    // Process the image (replace this with your 3D conversion logic)
+    const avatarImage = await processImage(imageData);
+
+    // Send the 3D avatar image as a response
+    res.set('Content-Type', 'image/png');
+    res.send(avatarImage);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error processing image');
+  }
+});
+
+// Function to process the image (replace this with your 3D conversion logic)
+async function processImage(imageData) {
+  const canvas = createCanvas(200, 200);
+  const ctx = canvas.getContext('2d');
+
+  // Load the image onto the canvas
+  const img = await loadImage(imageData);
+  ctx.drawImage(img, 0, 0, 200, 200);
+
+  // Add your 3D conversion logic here
+
+  // For simplicity, this example just returns the processed image as a Buffer
+  return canvas.toBuffer('image/png');
+}
+
+
+    // ----------------- avtar api making close -------------------------
+
+
+
+    app.get('/accounts/:id',   async(req, res) =>{
      const id = req.params.id;
      const query = {_id: ObjectId(id)};
      const booking = await accountsCollection.findOne(query);
@@ -75,6 +135,12 @@ async function run() {
       const cursor = accountsCollection.find(query);
       const accounts = await cursor.toArray();
       res.send(accounts);
+    });
+    app.get('/lotary', async (req, res) => {
+      const query = {};
+      const cursor = lotary.find(query);
+      const Lotary = await cursor.toArray();
+      res.send(Lotary);
     });
     app.get('/bank', async (req, res) => {
       const query = {};
@@ -126,11 +192,12 @@ async function run() {
     });
 
 
-
-
-
-
      // all post item
+     app.post('/lotary', async (req, res) => {
+      const nextcort = req.body;
+      const result = await lotary.insertOne(nextcort);
+      res.send(result)
+    });
      app.post('/nextcort', async (req, res) => {
       const nextcort = req.body;
       const result = await nestcortCollection.insertOne(nextcort);
@@ -182,7 +249,6 @@ async function run() {
       const query = {};
       const cursor = accountsCollection.find(query);
       const Accounts = await cursor.toArray();
-      
       const startdate = new Date(sdate);
       const enddate = new Date(edate);
       const filterdate = Accounts.filter(a => {
@@ -191,16 +257,14 @@ async function run() {
       }); 
       res.send(filterdate);
     });
-
-
-
-
-
-
-
-
-
+ 
     // delete one 
+    app.delete('/lotary/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await lotary.deleteOne(query);
+      res.send(result);
+    })
     app.delete('/nextcort/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
@@ -229,6 +293,10 @@ async function run() {
     app.delete('/accounts/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
+      console.log(query);
+      const quary_d_data = await accountsCollection.findOne(query)
+      const stresata = await deletedStored.insertOne(quary_d_data);
+
       const result = await accountsCollection.deleteOne(query);
       res.send(result); 
 
@@ -262,7 +330,6 @@ async function run() {
       res.send(result); 
 
     })
- 
     // Delete all data from the MongoDB collection
     app.get('/api/delete', async (req, res) => {
         const result = await dueCollection.deleteMany({});
@@ -357,6 +424,7 @@ async function run() {
       res.send(getSerarchProduct);
       const query = { _id: ObjectId(getSerarchProduct._id) };
       const result = await HoldCollection.deleteOne(query);
+      res.send('hold deleted')
     }) 
 
     //  filter datat between tow date 
@@ -368,8 +436,7 @@ async function run() {
       // const shop = await cursor.toArray(cursor);
       const query = {};
       const cursor = SaleCollection.find(query);
-      const shop = await cursor.toArray();
-      
+      const shop = await cursor.toArray(); 
       const startdate = new Date(sdate);
       const enddate = new Date(edate);
       const filterdate = shop.filter(a => {
@@ -378,8 +445,7 @@ async function run() {
       }); 
       res.send(filterdate);
     });
-
-
+ 
 
     // get with speacific product stock
     app.get('/products/:id', async (req, res) => {
@@ -408,15 +474,14 @@ async function run() {
 
  
 
-    // -------------------------------------------------------------sale ------
+    // ----------- Final  sales Data ------
     app.put('/finalsale', async (req, res) => {
       // const id = req.params.id; 
       const updatedStock = req.body;
       const arry = updatedStock.Sale_Data; 
       const query = {};
       const cursor = SaleCollection.find(query);
-      const sale = await cursor.toArray();
-
+      const sale = await cursor.toArray(); 
       console.log(updatedStock.Sale_Date);
       const sdate = await new Date(updatedStock.Sale_Date);
       const edate = await new Date(updatedStock.Sale_Date);
@@ -457,32 +522,8 @@ async function run() {
       // ---------------------------- update close ---------------------------------- 
       res.send({ 'data': 'succesfully data updated',updatedStock ,result,invoice_list});
     })
-
-
-
-    // .....object data ........................................................................................................
-    const productdata = {
-      "_id": "633f4e807784639f332e3b62",
-      "Supplier_Name": "EGG",
-      "BarCode": 111111,
-      "Group": "MILK & DAIRY PRODUCTS",
-      "Product": "EGG",
-      "Brand": "EGG",
-      "Style": "BROWN EGG 1PCS",
-      "Stock_Qty": 0,
-      "StockQty": 124,
-      "CPU": 11.19,
-      "CPU_Value": 0,
-      "RPU": 12,
-      "RPU_Value": 0,
-      "Damage_Quntity": 0,
-      "Comment": 0,
-      "Status": "active"
-    };
-
-
+ 
     // add brand 
-
     app.post('/brand', async (req, res) => {
       const newBrand = req.body; 
       const result = await brandCollection.insertOne(newBrand);
@@ -523,27 +564,7 @@ async function run() {
       res.send(result)
     });
 
-    //   search api
-    const rolll = {
-      "_id": "633f4e807784639f332e3afc",
-      "Supplier_Name": "DANISH FOOD LTD.",
-      "BarCode": 8941152000307,
-      "Group": "SNAKS & COOKIES",
-      "Product": "BISCUIT",
-      "Brand": "DANISH",
-      "Style": "DOREO 4 PACK",
-      "Stock_Qty": 0,
-      "StockQty": 6,
-      "CPU": 88,
-      "CPU_Value": 0,
-      "RPU": 110,
-      "RPU_Value": 0,
-      "Damage_Quntity": 9,
-      "Comment": 0,
-      "Status": "active"
-    };
-
-
+  
     app.get('/search/:target', async (req, res) => {
       let q = req.params;
       // console.log(q);
@@ -591,7 +612,6 @@ async function run() {
         res.send({ data: 'data not found' });
       }
     });
-
     // deleting item
     app.delete('/brand/:id', async (req, res) => {
       const id = req.params.id;
