@@ -257,6 +257,20 @@ async function processImage(imageData) {
       }); 
       res.send(filterdate);
     });
+    app.get('/sale-v1-date', async (req, res) => {
+      const { sdate, edate } = req.query;
+      console.log(sdate , edate); 
+      const query = {};
+      const cursor = SaleCollection.find(query);
+      const salelist = await cursor.toArray();
+      const startdate = new Date(sdate);
+      const enddate = new Date(edate);
+      const filterdate = salelist.filter(a => {
+        const date = new Date(a.Sale_Date);
+        return (date >= startdate && date <= enddate);
+      }); 
+      res.send(filterdate);
+    });
  
     // delete one 
     app.delete('/lotary/:id', async (req, res) => {
@@ -287,6 +301,13 @@ async function processImage(imageData) {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await costCollection.deleteOne(query);
+      res.send(result); 
+
+    })
+    app.delete('/sale-d/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await SaleCollection.deleteOne(query);
       res.send(result); 
 
     })
@@ -481,18 +502,42 @@ async function processImage(imageData) {
       const arry = updatedStock.Sale_Data; 
       const query = {};
       const cursor = SaleCollection.find(query);
-      const sale = await cursor.toArray(); 
-      console.log(updatedStock.Sale_Date);
+      const sale = await cursor.toArray();  
       const sdate = await new Date(updatedStock.Sale_Date);
       const edate = await new Date(updatedStock.Sale_Date);
       const filterdate = await sale.filter(a => {
         const date = new Date(a.date);
         return (date >= sdate && date <= edate);
       });
-      console.log(filterdate, '/////////////////');
+      console.log(filterdate, '/////////////////-----------------------');
  
       let invoice_list = [];
+      console.log(invoice_list, sale.length,  'sale data ---------');
       //------------------------------------
+      if (sale.length == 0 ) {  
+        console.log('-----------------------------log if  ----------------');
+
+        for await (const pro of arry) {
+          const ID = pro._id;
+          // console.log(pro._id, pro.StockQty - pro.orderq, pro);
+          const update = pro.StockQty - pro.orderq;
+          const filter = { _id: ObjectId(ID) };
+          const options = { upsert: true };
+          const updatedDoc = {
+            $set: {
+              StockQty: update
+            }
+          };
+          const result = await productsCollection.updateOne(filter, updatedDoc, options);
+          console.log(result);
+        }
+        // ---------------------------------------------- for  update  --------------
+        const result = await SaleCollection.insertOne(updatedStock);
+   
+      } 
+      else{
+        console.log('-----------------------------else   ----------------');
+        
         for await (const inv of sale){
           invoice_list=[...invoice_list, inv.Sale_Invoice.slice(-5)]
            console.log(inv.Sale_Invoice.slice(-5));
@@ -500,27 +545,34 @@ async function processImage(imageData) {
         const new_inv_num = (Math.max(...invoice_list) + 1).toString();
         const chng = updatedStock.Sale_Invoice.slice(-5)
         updatedStock.Sale_Invoice = updatedStock.Sale_Invoice.replace(chng, new_inv_num)
+
+        for await (const pro of arry) {
+          const ID = pro._id;
+          // console.log(pro._id, pro.StockQty - pro.orderq, pro);
+          const update = pro.StockQty - pro.orderq;
+          const filter = { _id: ObjectId(ID) };
+          const options = { upsert: true };
+          const updatedDoc = {
+            $set: {
+              StockQty: update
+            }
+          };
+          const result = await productsCollection.updateOne(filter, updatedDoc, options);
+          console.log(result);
+        }
+        const results = await SaleCollection.insertOne(updatedStock);
+
+        // ---------------------------------------------- for  update  --------------
+        // const result = await SaleCollection.insertOne(updatedStock);
+  
+      }
+      
+        
       //------------------------------------
 
-      for await (const pro of arry) {
-        const ID = pro._id;
-        // console.log(pro._id, pro.StockQty - pro.orderq, pro);
-        const update = pro.StockQty - pro.orderq;
-        const filter = { _id: ObjectId(ID) };
-        const options = { upsert: true };
-        const updatedDoc = {
-          $set: {
-            StockQty: update
-          }
-        };
-        const result = await productsCollection.updateOne(filter, updatedDoc, options);
-        console.log(result);
-      }
-      // ---------------------------------------------- for  update  --------------
-      const result = await SaleCollection.insertOne(updatedStock);
-
+      
       // ---------------------------- update close ---------------------------------- 
-      res.send({ 'data': 'succesfully data updated',updatedStock ,result,invoice_list});
+      res.send({ 'data': 'succesfully data updated',updatedStock  });
     })
  
     // add brand 
