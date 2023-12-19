@@ -304,7 +304,7 @@ async function processImage(imageData) {
       res.send(result); 
 
     })
-    app.delete('/sale-d/:id', async (req, res) => {
+    app.delete('/saled/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await SaleCollection.deleteOne(query);
