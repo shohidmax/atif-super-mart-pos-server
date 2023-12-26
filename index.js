@@ -32,7 +32,7 @@ async function run() {
     await client.connect();
     console.log('db connected');
     const productCollection = client.db('atifdatamax').collection('product');
-    const productsCollection = client.db('atifdatamax').collection('products');
+    const productsCollection = client.db('atifdatamax').collection('products_2');
     const products_2Collection = client.db('atifdatamax').collection('product_2');
     const brandCollection = client.db('atifdatamax').collection('brand');
     const supplierCollection = client.db('atifdatamax').collection('supplier');
