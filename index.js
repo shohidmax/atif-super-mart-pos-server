@@ -7,6 +7,7 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 
 const { MongoClient, ServerApiVersion, ObjectId, ISODate } = require('mongodb');
+const { error } = require('console');
 const app = express();
 const port = process.env.PORT || 3005;
 
@@ -29,6 +30,7 @@ app.use(express.json());
 const uri = "mongodb+srv://atifsupermart202199:FGzi4j6kRnYTIyP9@cluster0.bfulggv.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 async function node() {
+ try {
   io.on('/8266bd', (socket) => {
     console.log('Client connected');
   
@@ -36,6 +38,11 @@ async function node() {
     io.emit('pcPower'); // Broadcast to all clients to trigger NodeMCU
     });
   });
+  
+ } catch (error) {
+  
+ }
+ 
   
 }
 node();
