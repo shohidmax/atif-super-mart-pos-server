@@ -10,7 +10,9 @@ const { MongoClient, ServerApiVersion, ObjectId, ISODate } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 3005;
 
-
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+app.use(express.static('public'));
 //----------------------avatar api resorce -----------
 
 app.use(bodyParser.json());
@@ -26,13 +28,23 @@ app.use(express.json());
 
 const uri = "mongodb+srv://atifsupermart202199:FGzi4j6kRnYTIyP9@cluster0.bfulggv.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
-
+async function node() {
+  io.on('/8266bd', (socket) => {
+    console.log('Client connected');
+  
+    socket.on('togglePC', () => {
+    io.emit('pcPower'); // Broadcast to all clients to trigger NodeMCU
+    });
+  });
+  
+}
+node();
 async function run() {
   try {
     await client.connect();
     console.log('db connected');
     const productCollection = client.db('atifdatamax').collection('product');
-    const productsCollection = client.db('atifdatamax').collection('products_2');
+    const productsCollection = client.db('atifdatamax').collection('products');
     const products_2Collection = client.db('atifdatamax').collection('product_2');
     const brandCollection = client.db('atifdatamax').collection('brand');
     const supplierCollection = client.db('atifdatamax').collection('supplier');
