@@ -11,6 +11,7 @@ const { error } = require('console');
 const app = express();
 const port = process.env.PORT || 3005;
 
+
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 app.use(express.static('public'));
@@ -29,15 +30,10 @@ app.use(express.json());
 
 const uri = "mongodb+srv://atifsupermart202199:FGzi4j6kRnYTIyP9@cluster0.bfulggv.mongodb.net/?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
 async function node() {
  try {
-  io.on('/8266bd', (socket) => {
-    console.log('Client connected');
   
-    socket.on('togglePC', () => {
-    io.emit('pcPower'); // Broadcast to all clients to trigger NodeMCU
-    });
-  });
   
  } catch (error) {
   
@@ -61,6 +57,7 @@ async function run() {
     const SaleCollection = client.db('atifdatamax').collection('sale');
     const HoldCollection = client.db('atifdatamax').collection('hold');
     const proddCollection = client.db('atifdatamax').collection('prodd');
+    const wholesaleCollection = client.db('atifdatamax').collection('wholesale');
       // account temporary code for atif super mart
       const accountsCollection = client.db('atifdatamax').collection('accounts');
       const bankCollection = client.db('atifdatamax').collection('bank');
@@ -103,8 +100,7 @@ async function run() {
      const  date = new Date();
      console.log(date);
      res.send('bacfdfd', date)
-    })
-
+    }) 
     //-------------------avatar making api -----------------------------
     // Sample route for image upload and 3D avatar conversion
 app.post('/api/convertTo3DAvatar', upload.single('image'), async (req, res) => {
@@ -148,9 +144,16 @@ async function processImage(imageData) {
      const booking = await accountsCollection.findOne(query);
      res.send(booking);
     })
+    
     app.get('/api/accounts', async (req, res) => {
       const query = {};
       const cursor = accountsCollection.find(query);
+      const accounts = await cursor.toArray();
+      res.send(accounts);
+    });
+    app.get('/api/wholesale', async (req, res) => {
+      const query = {};
+      const cursor = wholesaleCollection.find(query);
       const accounts = await cursor.toArray();
       res.send(accounts);
     });
@@ -495,7 +498,7 @@ async function processImage(imageData) {
       res.send(sale);
     });
 
-    // get damage speacific product
+    // get damage speacific product by barcode
     app.get('/api/damage-stock-update/:id', async (req, res) => {
       const id = req.params.id;
       const querys = {};
@@ -667,6 +670,11 @@ async function processImage(imageData) {
     app.post('/api/ssr', async (req, res) => {
       const newSSR = req.body; 
       const result = await ssrCollection.insertOne(newSSR);
+      res.send(result)
+    });
+    app.post('/api/wholesale', async (req, res) => {
+      const newSSR = req.body; 
+      const result = await wholesaleCollection.insertOne(newSSR);
       res.send(result)
     });
 
